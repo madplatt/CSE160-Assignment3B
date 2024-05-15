@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Max's Blocky World</title>
+    </head>
+
+    <body onload="main()">
+        <div class="intro">
+            <b>Max Platt</b> <br>
+            <b>madplatt@ucsc.edu</b> <br> <br>
+            <b>Notes to Grader: Simple click and slider rotation still exist for demo purposes.</b> <br>
+            <b>2 Textures, "diamond.jpg" and "tiles.jpg"</b> <br> <br>
+        </div>
+        <canvas id="webgl" width="400" height="400">
+            Please use the browser supporting "canvas".
+        </canvas>
+        <br> <br>
+        <label for="camSlider">World Rotation: </label>
+        <input type="range" id="camSlider" name="cam" min="0.0" max="360.0" value="80.0" />
+        <br>
+        <script src="../lib/webgl-utils.js"></script>
+        <script src="../lib/webgl-debug.js"></script>
+        <script src="../lib/cuon-utils.js"></script>
+        <script src="../lib/cuon-matrix-cse160.js"></script>
+        <script src="BlockWorld.js"></script>
+        <script src="Cube.js"></script>
+        <script src="Camera.js"></script>
+
+    </body>
+</html>
