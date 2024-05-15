@@ -5,11 +5,10 @@ var VSHADER_SOURCE = `
     attribute vec2 a_UV;
     varying vec2 v_UV;
     uniform mat4 u_ModelMatrix; 
-    uniform mat4 u_GlobalRotationMatrix; 
     uniform mat4 u_ProjectionMatrix; 
     uniform mat4 u_ViewMatrix; 
     void main() {
-      gl_Position = u_ProjectionMatrix * u_ViewMatrix * u_GlobalRotationMatrix * u_ModelMatrix * a_Position;
+      gl_Position = u_ProjectionMatrix * u_ViewMatrix* u_ModelMatrix * a_Position;
       v_UV = a_UV;
     }`
 
@@ -47,7 +46,6 @@ let a_UV;
 let u_FragColor;
 let u_Sampler0, u_Sampler1;
 let u_ModelMatrix;
-let u_GlobalRotationMatrix;
 
 let g_camera;
 var g_texImage1, g_texImage2;
@@ -60,6 +58,7 @@ var g_secondsPassed = performance.now()/1000.0 - g_startTime;
 var g_fps;
 var g_oldFrameCount = 0, g_frameCount = 0;
 var g_map;
+var g_loadedTexture = null;
 
 function main() {
     setupWebGL();
@@ -177,7 +176,7 @@ function createWorld()
         {
             for (k = 0; k < zLen; k++)
             {
-                if (mazeArray1[i * 32 + k] == 1)
+                if (mazeArray[i * 32 + k] == 1)
                 {
                     var cube = new Cube(1);
                     cube.matrix.setTranslate(i,j,k);
@@ -224,7 +223,7 @@ function mouseControl(ev)
 {
     if (document.pointerLockElement == canvas) 
     {
-        g_camera.panRight(ev.movementX * .3);
+        g_camera.panHorizontal(ev.movementX * .3);
         g_camera.panVertical(ev.movementY * .3);
     }
 }
@@ -249,11 +248,11 @@ function keydown(ev)
     }
     if(ev.keyCode == 81) // q
     {
-        g_camera.panLeft(10);
+        g_camera.panHorizontal(-10);
     }
     if(ev.keyCode == 69) // q
     {
-        g_camera.panRight(10);
+        g_camera.panHorizontal(10);
     }
 }
 
@@ -321,12 +320,6 @@ function connectVariablesToGLSL() {
         return;
     }
 
-    u_GlobalRotationMatrix = gl.getUniformLocation(gl.program, 'u_GlobalRotationMatrix');
-    if (!u_GlobalRotationMatrix) {
-        console.log('Failed to get the storage location of u_GlobalRotationMatrix');
-        return;
-    }
-
     u_Sampler0 = gl.getUniformLocation(gl.program, 'u_Sampler0');
     if (!u_Sampler0) 
     {
@@ -343,12 +336,7 @@ function connectVariablesToGLSL() {
 }
 
 function setupHTMLElements() {
-    const camSlider = document.getElementById("camSlider");
-    if (!camSlider) {
-        console.log('Failed to retrieve the camSlider element');
-        return;
-    }
-    camSlider.addEventListener("mousemove", function() {g_globalAngleX = this.value; });
+
 }
 
 function click() {
@@ -460,10 +448,6 @@ function loadTexture(image, sampler, n)
 
 
 function updateAllObjects() {
-    var grm = new Matrix4().rotate(-g_globalAngleX,0,1,0);
-    grm.rotate(g_globalAngleY,1,0,0);
-    gl.uniformMatrix4fv(u_GlobalRotationMatrix, false, grm.elements);
-
     g_camera.update();
     gl.uniformMatrix4fv(u_ProjectionMatrix, false, g_camera.projMatrix.elements);
     gl.uniformMatrix4fv(u_ViewMatrix, false, g_camera.viewMatrix.elements);

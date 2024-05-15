@@ -10,6 +10,9 @@ class Camera {
         this.viewMatrix.setLookAt(-5,2,10, -4,2,10, 0,1,0); //Eye, At, Up
         this.projMatrix = new Matrix4();
         this.projMatrix.setPerspective(this.fov, canvas.width/canvas.height, 0.1, 1000);
+        this.forwardVec = new Vector3([0,0,0]);
+        this.sideVec = new Vector3([0,0,0]);
+        this.rotMatrix = new Matrix4();
     }
     update() {
         var eye = this.eye.elements;
@@ -27,7 +30,7 @@ class Camera {
         return this.viewMatrix;
     }
     moveForward(speed) {
-        var forwardVec = new Vector3([0,0,0]);
+        var forwardVec = this.forwardVec;
         forwardVec.set(this.at);
         forwardVec.sub(this.eye);
         forwardVec.normalize();
@@ -39,7 +42,7 @@ class Camera {
     moveBackward(speed) {
         var at = this.at;
         var eye = this.eye;
-        var forwardVec = new Vector3([0,0,0]);
+        var forwardVec = this.forwardVec;
         forwardVec.set(at);
         forwardVec.sub(eye);
         forwardVec.normalize();
@@ -52,7 +55,7 @@ class Camera {
         var at = this.at;
         var eye = this.eye;
         var up = this.up;
-        var forwardVec = new Vector3([0,0,0]);
+        var forwardVec = this.forwardVec;
         forwardVec.set(at);
         forwardVec.sub(eye);
         var sideVec = Vector3.cross(forwardVec, up) 
@@ -75,33 +78,17 @@ class Camera {
         eye.add(sideVec);
         at.add(sideVec);
     }
-    panLeft(angle)
+    panHorizontal(angle)
     {
         var atVec = this.at;
         var eyeVec = this.eye;
         var up = this.up.elements;
-        var forwardVec = new Vector3([0,0,0]);
+        var forwardVec = this.forwardVec;
         forwardVec.set(atVec);
         forwardVec.sub(eyeVec);
         forwardVec.normalize();
-        var rotation = new Matrix4().setRotate(angle,up[0],up[1],up[2]);
-        var atDelta = rotation.multiplyVector3(forwardVec);
-        atDelta.normalize();
-        forwardVec.set(eyeVec);
-        forwardVec.add(atDelta);
-        atVec.set(forwardVec);
-    }
-    panRight(angle)
-    {
-        var atVec = this.at;
-        var eyeVec = this.eye;
-        var up = this.up.elements;
-        var forwardVec = new Vector3([0,0,0]);
-        forwardVec.set(atVec);
-        forwardVec.sub(eyeVec);
-        forwardVec.normalize();
-        var rotation = new Matrix4().setRotate(-angle,up[0],up[1],up[2]);
-        var atDelta = rotation.multiplyVector3(forwardVec);
+        this.rotMatrix.setRotate(-angle,up[0],up[1],up[2]);
+        var atDelta = this.rotMatrix.multiplyVector3(forwardVec);
         atDelta.normalize();
         forwardVec.set(eyeVec);
         forwardVec.add(atDelta);
@@ -112,15 +99,14 @@ class Camera {
         var atVec = this.at;
         var eyeVec = this.eye;
         var upVec = this.up;
-        var forwardVec = new Vector3([0,0,0]);
+        var forwardVec = this.forwardVec;
         forwardVec.set(atVec);
         forwardVec.sub(eyeVec);
         forwardVec.normalize();
         var sideVec = Vector3.cross(forwardVec, upVec) 
         sideVec.normalize();
-        var side = sideVec.elements;
-        var rotation = new Matrix4().setRotate(-angle,side[0],side[1],side[2]);
-        var atDelta = rotation.multiplyVector3(forwardVec);
+        this.rotMatrix.setRotate(-angle,sideVec.elements[0],sideVec.elements[1],sideVec.elements[2]);
+        var atDelta = this.rotMatrix.multiplyVector3(forwardVec);
         atDelta.normalize();
         forwardVec.set(eyeVec);
         forwardVec.add(atDelta);

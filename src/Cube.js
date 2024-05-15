@@ -4,79 +4,63 @@ class Cube {
         this.color = [1.0, 1.0, 1.0, 1.0];
         this.matrix = new Matrix4();
         this.texValue = texValue;
+        this.vertices = [];
+        this.uv = [];
+        var vertices = this.vertices;
+        var uv = this.uv;
+        // Front
+        vertices.push(0,1,1, 0,0,1, 1,0,1);
+        uv.push(0,1, 0,0, 1,0,);
+        vertices.push(0,1,1, 1,0,1, 1,1,1);
+        uv.push(0,1, 1,0, 1,1);
+
+        // Left 
+        vertices.push(0,1,0, 0,0,0, 0,0,1);
+        uv.push(0,1, 0,0, 1,0);
+        vertices.push(0,1,0, 0,0,1, 0,1,1);
+        uv.push(0,1, 1,0, 1,1);
+
+        // Right
+        vertices.push(1,1,1, 1,0,1, 1,0,0,);
+        uv.push(0,1, 0,0, 1,0);
+        vertices.push(1,1,1, 1,0,0, 1,1,0);
+        uv.push(0,1, 1,0, 1,1);
+
+        // Top
+        vertices.push(0,1,0, 0,1,1, 1,1,1);
+        uv.push(1,0, 1,1, 0,1);
+        vertices.push(0,1,0, 1,1,1, 1,1,0);
+        uv.push(1,0, 0,1, 0,0);
+
+        // Back
+        vertices.push(1,1,0, 1,0,0, 0,1,0);
+        uv.push(0,1, 0,0, 1,1);
+        vertices.push(0,1,0, 1,0,0, 0,0,0);
+        uv.push(1,1, 0,0, 1,0);
+
+        // Bottom
+        vertices.push(0,0,1, 0,0,0, 1,0,0);
+        uv.push(0,1, 0,0, 1,0);
+        vertices.push(0,0,1, 1,0,0, 1,0,1);
+        uv.push(0,1, 1,0, 1,1);
     }
     update() {}
     render()
     {
         //console.log("" + this.texValue);
-        gl.uniform1i(u_TexSelect, this.texValue);
-        var color = this.color;
-        gl.uniform4f(u_FragColor, color[0], color[1], color[2], color[3]);
+        if(this.texValue < 0)
+        {
+            gl.uniform4f(u_FragColor, this.color[0], this.color[1], this.color[2], this.color[3]);
+        }
+        if(g_loadedTexture != this.texValue)
+        {
+            gl.uniform1i(u_TexSelect, this.texValue);
+            g_loadedTexture = this.texValue;
+        }
+        
         gl.uniformMatrix4fv(u_ModelMatrix, false, this.matrix.elements);
-        var vertices = [];
-        var uv = [];
-        // Front
-        vertices.push(0,0,0, 1,1,0, 1,0,0);
-        uv.push(1,0, 0,1, 1,1);
-        vertices.push(0,0,0, 0,1,0, 1,1,0);
-        uv.push(1,0, 0,0, 0,1);
-
-        //drawTriangle3D([0,0,0, 1,1,0, 1,0,0]);
-        //drawTriangle3D([0,0,0, 0,1,0, 1,1,0]);
-
-        // Back
-        vertices.push(0,0,1, 1,0,1, 1,1,1);
-        uv.push(0,0, 0,1, 1,1);
-        vertices.push(0,0,1, 1,1,1, 0,1,1);
-        uv.push(0,0, 1,1, 1,0);
-
-        //drawTriangle3D([0,0,1, 1,1,1, 1,0,1]);
-        //drawTriangle3D([0,0,1, 0,1,1, 1,1,1]);
-
-        //gl.uniform4f(u_FragColor, color[0] * .9, color[1] * .9, color[2] * .9, color[3]);
-        // Right Side
-        vertices.push(1,0,0, 1,0,1, 1,1,1);
-        uv.push(0,0, 1,0, 1,1);
-
-        vertices.push(1,0,0, 1,1,0, 1,1,1);
-        uv.push(0,0, 0,1, 1,1);
-
-        //drawTriangle3D([1,0,0, 1,0,1, 1,1,1]);
-        //drawTriangle3D([1,0,0, 1,1,1, 1,1,0]);
-
-        // Left Side
-        vertices.push(0,0,0, 0,0,1, 0,1,1);
-        uv.push(0,0, 0,1, 1,1);
-
-        vertices.push(0,0,0, 0,1,0, 0,1,1);
-        uv.push(0,0, 1,0, 1,1);
-
-        //drawTriangle3D([0,1,0, 0,1,1, 0,0,1]);
-        //drawTriangle3D([0,1,0, 0,0,1, 0,0,0]);
-
-        //gl.uniform4f(u_FragColor, color[0] * .8, color[1] * .8, color[2] * .8, color[3]);
-
-        // Top
-        vertices.push(1,1,0, 1,1,1, 0,1,0);
-        uv.push(0,0, 1,0, 0,1);
-
-        vertices.push(1,1,1, 0,1,1, 0,1,0);
-        uv.push(1,0, 1,1, 0,1);
-
-        //drawTriangle3D([1,1,0, 1,1,1, 0,1,0]);
-        //drawTriangle3D([1,1,1, 0,1,1, 0,1,0]);
-
-        // Bottom
-        vertices.push(0,0,0, 0,0,1, 1,0,1);
-        uv.push(1,0, 1,1, 0,1);
-
-        vertices.push(0,0,0, 1,0,0, 1,0,1);
-        uv.push(1,0, 0,0, 0,1);
-
-        //drawTriangle3D([0,0,0, 0,0,1, 1,0,1]);
-        //drawTriangle3D([0,0,0, 1,0,1, 1,0,0]);  
-        //console.log("Drawing a Cube");
-        drawTriangle3DUV(vertices, uv);
+        
+        drawTriangle3DUV(this.vertices, this.uv);
     }
 }
 
@@ -106,7 +90,7 @@ function drawTriangle3DUV(vertices, uv) {
     gl.vertexAttribPointer(a_UV, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(a_UV);
 
-
+    
 
     gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 3);
 }
