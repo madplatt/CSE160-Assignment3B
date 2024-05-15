@@ -18,6 +18,7 @@ var FSHADER_SOURCE = `
     uniform vec4 u_FragColor;
     uniform sampler2D u_Sampler0;
     uniform sampler2D u_Sampler1;
+    uniform sampler2D u_Sampler2;
     uniform int u_TexSelect;
     varying vec2 v_UV;
     void main() {
@@ -33,6 +34,9 @@ var FSHADER_SOURCE = `
       else if (u_TexSelect == 1) {
         gl_FragColor = texture2D(u_Sampler1, v_UV);
       }
+      else if (u_TexSelect == 2) {
+        gl_FragColor = texture2D(u_Sampler2, v_UV);
+      }
     }`
 
 
@@ -44,7 +48,7 @@ let u_TexSelect;
 let a_Position;
 let a_UV;
 let u_FragColor;
-let u_Sampler0, u_Sampler1;
+let u_Sampler0, u_Sampler1, u_Sampler2;
 let u_ModelMatrix;
 
 let g_camera;
@@ -59,6 +63,7 @@ var g_fps;
 var g_oldFrameCount = 0, g_frameCount = 0;
 var g_map;
 var g_loadedTexture = null;
+var g_cheatsEnabled = false;
 
 function main() {
     setupWebGL();
@@ -117,47 +122,14 @@ function createWorld()
     1,1,1,0,0,1,0,0,1,0,0,1,1,1,1,1,1,1,1,0,0,1,0,0,0,0,0,0,0,0,1,1,
     1,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,1,
     1,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,1,
-    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,
-    1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,
-    1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,
-    1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,0,0,1,1,1,1,1,1,1,1,
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,0,0,1,1,
+    1,0,0,0,0,0,0,0,0,0,2,2,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,
+    1,0,0,0,0,0,0,0,0,0,2,2,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,
+    1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,0,0,1,1,1,1,1,1,1,1,
     1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,
     1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,
     1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
     1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]
-    mazeArray1 = 
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
     //console.log("" + mazeArray);
     var xLen = 32;
     var yLen = 4;
@@ -172,17 +144,42 @@ function createWorld()
     //console.log("" + g_map);
     for(i = 0; i < xLen; i++)
     {
-        for(j = 0; j < yLen; j++)
+        for(k = 0; k < zLen; k++)
         {
-            for (k = 0; k < zLen; k++)
+            for (j = 0; j < yLen; j++)
             {
-                if (mazeArray[i * 32 + k] == 1)
+                var mazeVal = mazeArray[i * 32 + k];
+                if (mazeVal == 1)
                 {
-                    var cube = new Cube(1);
+                    var cube = new Cube(mazeVal);
                     cube.matrix.setTranslate(i,j,k);
-                    g_map[i][j][k] = 1;
-                    g_objList.push(cube);
+                    if (j == 0)
+                    { 
+                        g_map[i][j][k] = 1;
+                        g_objList.push(cube);
+                    }
+                    else if (g_map[i][j-1][k] == 1)
+                    {
+                        if (Math.random() < .9)  {
+                            g_map[i][j][k] = 1;
+                            g_objList.push(cube);
+                        }
+                        else
+                        {
+                            g_map[i][j][k] = 0;
+                        }
+                    }
                 }
+                if (mazeVal == 2)
+                    {
+                        var cube = new Cube(mazeVal);
+                        cube.matrix.setTranslate(i,j,k);
+                        if (j == 0)
+                        { 
+                            g_map[i][j][k] = 1;
+                            g_objList.push(cube);
+                        }
+                    }
             }
         }
     }
@@ -195,8 +192,8 @@ function createWorld()
     g_objList.push(cube);
 
     cube = new Cube(0);
-    cube.matrix.setTranslate(-50,-.1,-50);
-    cube.matrix.scale(100,.1,100);
+    cube.matrix.setTranslate(-100,-.1,-100);
+    cube.matrix.scale(150,.1,150);
     g_objList.push(cube);
 }
 
@@ -224,7 +221,10 @@ function mouseControl(ev)
     if (document.pointerLockElement == canvas) 
     {
         g_camera.panHorizontal(ev.movementX * .3);
-        g_camera.panVertical(ev.movementY * .3);
+        if(g_cheatsEnabled === true)
+        {
+            g_camera.panVertical(ev.movementY * .3);
+        }
     }
 }
 
@@ -333,13 +333,28 @@ function connectVariablesToGLSL() {
         console.log('Failed to get storage location of u_Sampler1');
         return false;
     }
+    u_Sampler2 = gl.getUniformLocation(gl.program, 'u_Sampler2');
+    if (!u_Sampler2) 
+    {
+        console.log('Failed to get storage location of u_Sampler2');
+        return false;
+    }
 }
 
 function setupHTMLElements() {
-
+    const toggleButton = document.getElementById("toggleButton");
+    if (!toggleButton) {
+        console.log('Failed to retrieve the toggleButton element');
+        return;
+    }
+    toggleButton.addEventListener("click", function() {g_cheatsEnabled = !(g_cheatsEnabled); });
 }
 
 function click() {
+    if(!g_cheatsEnabled)
+    {
+        return;
+    }
     console.log("Click Triggered");
     var targetCoords = g_camera.at.elements;
     var tX = Math.floor(targetCoords[0]);
@@ -399,22 +414,32 @@ function initTextures()
     var texImage0 = new Image();
     if(!texImage0)
     {
-        console.log('Failed to create the image object');
+        console.log('Failed to create image object 0');
         return false;
     }
 
     texImage0.onload = function(){ loadTexture(texImage0, u_Sampler0, 0); };
-    texImage0.src = 'tiles.jpg';
+    texImage0.src = 'grass.png';
 
     var texImage1 = new Image();
     if(!texImage1)
     {
-        console.log('Failed to create the image object');
+        console.log('Failed to create image object 1');
         return false;
     }
 
     texImage1.onload = function(){ loadTexture(texImage1, u_Sampler1, 1); };
-    texImage1.src = 'diamond.jpg';
+    texImage1.src = 'brick.png';
+
+    var texImage2 = new Image();
+    if(!texImage2)
+    {
+        console.log('Failed to create image object 2');
+        return false;
+    }
+
+    texImage2.onload = function(){ loadTexture(texImage2, u_Sampler2, 2); };
+    texImage2.src = 'diamond.jpg';
 
     return true;
 }
@@ -436,6 +461,10 @@ function loadTexture(image, sampler, n)
     else if (n == 1)
     {
         gl.activeTexture(gl.TEXTURE1);
+    }
+    else if (n == 2)
+    {
+        gl.activeTexture(gl.TEXTURE2);
     }
     gl.bindTexture(gl.TEXTURE_2D, texture);
 
